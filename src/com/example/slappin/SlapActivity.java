@@ -15,11 +15,10 @@ public class SlapActivity extends Activity implements SensorEventListener{//, Me
 	private float gravity[] = new float[3];
 	private float linear_acceleration[] = new float[3];
 	private float lastx, lasty, lastz;
-	private boolean peak = false;
+	private boolean peakFound = false;
 	private boolean start = true;
-	private boolean go = false;
-	private boolean loaded = false;
 	MediaPlayer slap;
+	private int count = 0;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -29,9 +28,7 @@ public class SlapActivity extends Activity implements SensorEventListener{//, Me
 		sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
 		accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 		sensorManager.registerListener(this, accelerometer, sensorManager.SENSOR_DELAY_NORMAL);
-		
 		slap = MediaPlayer.create(SlapActivity.this, R.raw.slap);
-		//slap.setOnCompletionListener(this);
 	}
 
 	@Override
@@ -43,7 +40,6 @@ public class SlapActivity extends Activity implements SensorEventListener{//, Me
 	
 	protected void onResume(){
 		super.onResume();
-		slap.start();
 	}
 	
 	protected void onPause(){
@@ -87,34 +83,36 @@ public class SlapActivity extends Activity implements SensorEventListener{//, Me
 		//Check if we've reached the peak... or, by peak, I mean if we've gone from an increasing amount of force to a decreasing amount of 
 		//force. Too lazy to change at night. However, need to set it so that I wait until the "slap" is finished being in motion before
 		//playing the sound 
-		if((Math.floor(Math.abs(lastz)) > Math.floor(Math.abs(linear_acceleration[2]))) && !(Math.floor(Math.abs(lastz)) <= 1) && !peak ){
-			Log.d("Math floor lastz: ", ""+ Math.floor(Math.abs(lastz)));
-			Log.d("Math floor current z: ", ""+ Math.floor(Math.abs(linear_acceleration[2])));
-			peak = true;
-			Log.d("Did it work?...", "It works!!!!!! YUS!");
-			go = true;
-			//play sound accordingly
-			if(Math.abs(lastz) > 30){
-				Log.d("Slap speed z: ", lastz + " cm/s^");
-				Log.d("Current z: ", linear_acceleration[2] + " cm/s^2");
-				Log.d("Slap speed y: ", lasty + " cm/s^2");
-				Log.d("Current y: ", linear_acceleration[1] + " cm/s^2");
-				Log.d("Slap speed x: ", lastx + " cm/s^2");
-				Log.d("Current x: ", linear_acceleration[0] + " cm/s^2");
+		if((Math.abs(lastz) > Math.abs(linear_acceleration[2])) && !(Math.abs(lastz) <= 5) && !peakFound && !start){
+			//if(Math.abs(lastz) > 30){
 				slap.start();
-			}
+			//}
+			Log.d("Math floor lastz", ""+ Math.abs(lastz));
+			Log.d("Math floor current z", ""+ Math.abs(linear_acceleration[2]));
+			peakFound = true;
+			Log.d("Status", "Registering peak speed of the motion");
+			Log.d("Slap speed z: ", lastz + " cm/s^");
+			Log.d("Slap speed y: ", lasty + " cm/s^2");
+			Log.d("Current y: ", linear_acceleration[1] + " cm/s^2");
+			Log.d("Slap speed x: ", lastx + " cm/s^2");
+			Log.d("Current x: ", linear_acceleration[0] + " cm/s^2");
+
+			//Log.d("Did it work?...", "It works!!!!!! YUS!");
+			//play sound accordingly...jk
 			
 			
 		}
-		else if(Math.abs(Math.floor(lastz)) == Math.abs(Math.floor(linear_acceleration[2])) && go && peak){
-			//slap.stop();
-			peak = false;
-			go = false;	
+		else if(Math.abs(linear_acceleration[2]) <= 5 && peakFound){
+
+			peakFound = false;	
 		}
 		
-		if(start)
-			start = !start;;
+		if(start && count > 2)
+			start = false;
+		else
+			count += 1;
 		
+		Log.d("Count", ""+count);
 		Log.d("Last x: ", ""+lastx);
 		Log.d("Last y: ", ""+lasty);
 		Log.d("Last z: ", ""+lastz);
@@ -127,13 +125,5 @@ public class SlapActivity extends Activity implements SensorEventListener{//, Me
 		
 		
 	}
-
-
-	/*public void onCompletion(MediaPlayer mp) {
-		//mp.stop();
-		//slap.stop();
-		//mp.release();
-		//slap.release();
-	}*/
 
 }
