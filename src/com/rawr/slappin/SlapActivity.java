@@ -136,11 +136,13 @@ public class SlapActivity extends Activity implements SensorEventListener {
 
 	protected void onResume() {
 		super.onResume();
+		chill = false;
 		currentPlayer = (spinner.getSelectedItemPosition() == 0) ? slap : bonk;
 	}
 
 	protected void onPause() {
 		super.onPause();
+		chill = true;
 		currentPlayer.stop();
 	}
 
@@ -169,6 +171,7 @@ public class SlapActivity extends Activity implements SensorEventListener {
 			linear_acceleration[1] = event.values[1] - gravity[1];
 			linear_acceleration[2] = event.values[2] - gravity[2];
 
+			//Convert meters per second squared to centimeters per second squared
 			linear_acceleration[0] *= 100;
 			linear_acceleration[1] *= 100;
 			linear_acceleration[2] *= 100;
